@@ -3,17 +3,18 @@
 
 1.	A **regular expression** is an object in Javascript that describes a pattern of characters.  It allows ways of searching or checking for patterns of characters.
 
-2.  Regular expressions are often extremely dense and cryptic in appearance.  In fact, it is probably best to err on the side of caution in one's use of them, because they are very rigid and are often more difficult to read than to write, making it difficult for subsequent coders to understand.  Best to use with good commenting!
+2.  Regular expressions are often extremely dense and cryptic in appearance.  In fact, it is probably best to err on the side of caution in one's use of them, because they are very rigid and are often more difficult to read than to write, making it challenging for subsequent coders to understand.  Best to use with good commenting!
 
 3.  On the other hand, they can be learned and implemented a little at a time - if one is comfortable with a use, and it makes the solution easier, go for it; if it is too difficult, just ignore them. 
 
 4.  Regular expressions usually have a significant performance advantage over equivalent string operations in Javascript (according to *Javascript, The Good Parts, page 65*).
 
+5. The following problem is from a code-challenge website.  Originally, I solved it without regular expressions in what was conceptually a pretty straightforward manner, but which became quite cumbersome.  Some months later, after learning a bit about regular expressions, I revised my solution to that set out below, which was much more straightforward and involved many fewer lines of code: 
 
 
-	**Example:** *Create a function SimpleSymbols(str) to take the str parameter being passed and determine if it is an acceptable sequence by either returning 'true' or 'false' (as a string).  The str parameter will be composed of + and = symbols with several letters between them (i.e. ++d+===+c++==a) and for the string to be true each letter must be surrounded by a + symbol.  So the previous example would return false, as a is not followed by a +.  The string will not be empty and will have at least one letter.*
+	**Problem:** *Create a function SimpleSymbols(str) to take the str parameter being passed and determine if it is an acceptable sequence by either returning 'true' or 'false' (as a string).  The str parameter will be composed of + and = symbols with several letters between them (i.e. ++d+===+c++==a) and for the string to be true each letter must be surrounded by a + symbol.  So the previous example would return false, as a is not followed by a +.  The string will not be empty and will have at least one letter.*
 
-	This problem is a good example of how regular expressions can make life much easier.  Without them, the syntax of the solution would be considerably more involved and error prone.  
+	For now, don't worry about the meaning of the code, just note how easily one is able to code the inspections necessary to return the correct answer.  As you begin learning the syntax, revisit and see how well you understand what is being expressed.  
 
 		function SimpleSymbols(str) { 
 
@@ -35,7 +36,24 @@
 		}
 
 ###Where to Use Regular Expressions
-####RegExp Methods
+####RegExp Properties
+#####lastIndex
+1. lastIndex is a RegExp property that specifies the index of the point immediately following the last match made by a RegExp pattern.  It applies only if the search pattern is using the global ('g') flag.  As discussed later, this flag directs the search to find all instances of a pattern match, rather than stopping after the first match is made.
+2. The lastIndex property starts at 0, and gets reset to 0 if no match is made by the exec() or test() methods.  The operation of the lastIndex property is illustrated below:
+
+		var str = "Ho, Ho, Ho, said the jolly old fat man.";
+		var pattern = /ho/ig;
+		console.log("lastIndex start: " + patt.lastIndex); => lastIndex start: 0)
+		while (patt.test(str) === true) {
+			console.log("now it is: " + patt.lastIndex);
+			
+		=> 	now it is: 2
+			now it is: 5
+			now it is: 8
+			
+			
+#
+###RegExp Methods
 1. RegExp is an object type in javascript, just as Array, String, Date, etc.  RegExp has two methods that are commonly used, exec() and test().  Test() is the easier method, so let's begin with it:
 
 ##### **test()** 
@@ -59,7 +77,7 @@ A simple example:
 Test() is a great method to use for practicing regular expressions.  As you learn the syntax, make up strings, RegExp objects, and see if they behave as you think they should.
 
 #####exec()
-1. Exec() is a more complicated method.
+1. Exec() is a more complicated method.  If no match is found, it returns the null object.  If a match is found, it returns an array, consisting of at least three elements, the first being the match value as a string, the second and subsequent being the "captured" values from the search, the penultimate being the index of the match, and the final being a repeat of the searched string.  
 
 
 ####String Methods
@@ -85,6 +103,8 @@ Test() is a great method to use for practicing regular expressions.  As you lear
 	b. it returns a new string with the substitution(s) made.
 	c.  it has no side effects.
 	
+
+	
 			var str = 'Mr. Blue has a blue guitar and a blue car.'
 			pattern1 = 'blue';
 			pattern2 = /blue/g;
@@ -92,6 +112,14 @@ Test() is a great method to use for practicing regular expressions.  As you lear
 			
 			console.log(str.replace(pattern1, newItem)); => Mr. Blue has a red guitar and a blue car.
 			console.log(str.replace(pattern2, newItem)); => Mr. Blue has a red guitar and a red car.
+
+2.If the search pattern employs capturing parentheses, the items captured can be employed in the replacement by reference to their order number in a quotation string, preceded by "$".  See the following example:
+
+		var str = "John Smith in England";
+		var patt = /(\w+)\s(w+)\s(?:of|in|from)\s([A-Za-z\s]+)/
+		var newstring = str.replace(patt, '$2 Bazoom $1 of $3');
+		console.log(newstring) => "Smith Bazoom John of England";
+		
 
 
 #####split()
@@ -383,6 +411,43 @@ Test() is a great method to use for practicing regular expressions.  As you lear
     		return pattern.test(val);
 		})
 		console.log(res); => [true, true, false, true];
+
+#####Rule 16: Parenthesis are used to indicate portions of a matched substring that are to be remembered.
+1. Putting parentheses around a portion of a portion of the regular expression pattern will cause it to be "captured," i.e., remembered.  For now, we will not worry about what we can do with the captured portions.  We can see the captured portions if we use the exec() function, which returns an array, the first element of which is the matching string, followed by the captured matching pieces in elements one through however many matches there are, followed by the index and input elements. For example, compare the following:
+
+		var string = "Now is the winter of our discontent";
+		var pattern = /the\swin/
+		var res = pattern.exec(string);
+		console.log(res); => ['the win', index: 7, input: 'Now is the winter of our discontent']
+		
+		//Now, with parenthesis:
+		
+		var string = "Now is the winter of our discontent";
+		var pattern = /(the)\s(win)/
+		var res = pattern.exec(string);
+		console.log(res); => ['the', 'the', 'win', index: 7, input: 'Now is the winter of our discontent']
+
+	Note that in the second example, the array returned contains two more items, at res[1] and res[2], being the captured items.
+
+#####Rule 17: The capturing effect of parentheses can be negated by use of "?:".
+1. There are times when one might wish to use parentheses to group characters, without causing them to be captured.  For example, the reptition brackets discussed in Rule ___ will only operate on the 'w' of Now{3}, causing a search for "Nowww", whereas (Now){3} will search for NowNowNow.
+2. In the above example, we only want the parentheses to group our letters for application of the {3} operator, but use of the parentheses will cause the string "Now" to be captured.  We can prevent capturing by preceding the item in parentheses with a question mark and colon (?:).  Compare the following:
+
+		var str = "Ho Ho Ho said the fat man.";
+		var patt = /(Ho\s){3}/
+		var res = patt.exec(str);
+
+		console.log(res); => ['Ho Ho Ho ', 'Ho ', index: 0, input: 'Ho Ho Ho said the fat man.']
+		
+		//Now with the noncapturing syntax:
+		
+		var str = "Ho Ho Ho said the fat man.";
+		var patt = /(?:Ho\s){3}/
+		var res = patt.exec(str);
+
+		console.log(res); => ['Ho Ho Ho ', index: 0, input: 'Ho Ho Ho said the fat man.']
+
+
 
 #####Rule 16: Matches can be made dependent on the presence (?=) or absence(?!) of subsequent items that are not included in the match.
 1.  This is known as either a positive or negative lookahead.  For example:
